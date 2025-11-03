@@ -4,6 +4,7 @@ package cterm
 import (
 	"bufio"
 	"fmt"
+	"os/exec"
 	"syscall"
 	"unsafe"
 )
@@ -38,6 +39,18 @@ func GetSize() (int, int, error){
 
 	// Return columns and rows (width, height)
 	return int(ws.Col), int(ws.Row), nil
+}
+
+
+// Sets terminal into pseudo raw-mode. This disables line buffering
+func Raw() func() {
+	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
+	exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
+
+	return func() {
+		exec.Command("stty", "-F", "/dev/tty", "echo").Run()
+		exec.Command("stty", "-F", "/dev/tty", "-cbreak").Run()
+	}
 }
 
 
