@@ -4,7 +4,6 @@ package cterm
 import (
 	"bufio"
 	"fmt"
-	"os/exec"
 	"syscall"
 	"unsafe"
 )
@@ -44,12 +43,45 @@ func GetSize() (int, int, error){
 
 // Sets terminal into pseudo raw-mode. This disables line buffering
 func Raw() func() {
-	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
-	exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
+	// Get current terminal settings
+	var termios syscall.Termios
+	_, _, err := syscall.Syscall(
+		syscall.SYS_IOCTL,
+		uintptr(syscall.Stdin),
+		uintptr(syscall.TCGETS),
+		uintptr(unsafe.Pointer(&termios)),
+	)
 
+	// Error handling
+	if err != 0 {
+		panic(err)
+	}
+
+	// Save terminal settings for restore
+	oldTermios := termios
+
+	// Change terminal settings
+	termios.Lflag &^= syscall.ECHO | syscall.ICANON // Disable echo and canonical mode
+	termios.Cc[syscall.VMIN] = 1 					// Minimum read characters
+	termios.Cc[syscall.VTIME] = 0					// Infinite timeout
+
+	// Set Raw mode
+	syscall.Syscall(
+		syscall.SYS_IOCTL,
+		uintptr(syscall.Stdin),
+		uintptr(syscall.TCSETS),
+		uintptr(unsafe.Pointer(&termios)),
+	)
+
+	// This is what gets deferred to restore terminal functionality
 	return func() {
-		exec.Command("stty", "-F", "/dev/tty", "echo").Run()
-		exec.Command("stty", "-F", "/dev/tty", "-cbreak").Run()
+		// Set terminal settings back to the original values
+		syscall.Syscall(
+			syscall.SYS_IOCTL,
+			uintptr(syscall.Stdin),
+			uintptr(syscall.TCSETS),
+			uintptr(unsafe.Pointer(&oldTermios)),
+		)
 	}
 }
 
