@@ -1,5 +1,6 @@
 package cterm
 
+
 import (
 	"bufio"
 	"fmt"
@@ -7,6 +8,8 @@ import (
 	"unsafe"
 )
 
+
+// window size class (expected from ioctl)
 type winsize struct {
 	Row		uint16
 	Col		uint16
@@ -56,8 +59,7 @@ func ShowCursor(screen *bufio.Writer){
 }
 
 
-/*
 // Move cursor to specified location
-func MoveCursor(buffer io.Writer, x, y int){
+func MoveCursor(buffer *bufio.Writer, x, y int){
 	fmt.Fprintf(buffer, "\033[%d;%dH", y+1, x+1)
 }

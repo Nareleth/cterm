@@ -2,9 +2,8 @@
 Created because I don't like the alternatives :D
 
 ## To Do:
-- Draw Example:
-    - re-enable move cursor
-    - loop and print a box around the current terminal 
-- Get immediate key input example (without raw mode. unless we need to) (4-input)
-- Change colorsColors
+- Change Colors function
 - Color Example (3-colors)
+    - Print a rainbow table
+- Test getting key input without raw mode
+- Create a game example using keyboard input
