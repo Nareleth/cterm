@@ -54,14 +54,11 @@ cterm.Clear(screen)
 ```
 func GetSize() (int, int, error)  
 ```  
- Return the visible dimensions of your terminal.  
+Return the visible dimensions of your terminal.  
 <details>
 <summary>Example</summary>
 ```
-// Get width and height from the GetSize function
 width, height, _ := cterm.GetSize()
-
-// Print the Terminal Dimensions in (X, Y) plot form
 fmt.Printf("Terminal Dimensions: (%d, %d)\n", width, height)
 ```
 </details>
@@ -104,7 +101,6 @@ Raw sets the terminal to raw mode, and restores to previous state when finished.
 ```
 // Set terminal in Raw Mode
 cleanup := cterm.Raw()
-
 // Restore terminal settings when finished
 defer cleanup()
 ```
