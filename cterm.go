@@ -9,6 +9,28 @@ import (
 )
 
 
+// Create struct to capture colors and reset byte groups
+type colorEscapeCodes struct {
+	Black, Red, Green, Yellow, Blue, Magenta, Cyan, White string
+
+	Reset string
+}
+
+// Write escape sequence to style text
+var Colors = colorEscapeCodes {
+	Black: 		"\033[30m",
+	Red: 		"\033[31m",
+	Green: 		"\033[32m",
+	Yellow: 	"\033[33m",
+	Blue: 		"\033[34m",
+	Magenta: 	"\033[35m",
+	Cyan: 		"\033[36m",
+	White: 		"\033[37m",
+	Reset: 		"\033[0m",
+}
+
+
+
 // window size class (expected from ioctl)
 type winsize struct {
 	Row		uint16
