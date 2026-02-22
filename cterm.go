@@ -4,6 +4,7 @@ package cterm
 import (
 	"bufio"
 	"fmt"
+	"os"
 	"syscall"
 	"time"
 	"unsafe"
@@ -79,44 +80,45 @@ func GetSize() (int, int, error){
 
 // Sets terminal into pseudo raw-mode. This disables line buffering
 func Raw() func() {
-	// Get current terminal settings
+	fd := int(os.Stdin.Fd())
 	var termios syscall.Termios
-	_, _, err := syscall.Syscall(
+
+	// Get current settings
+	if _, _, errno := syscall.Syscall(
 		syscall.SYS_IOCTL,
-		uintptr(syscall.Stdin),
+		uintptr(fd),
 		uintptr(syscall.TCGETS),
 		uintptr(unsafe.Pointer(&termios)),
-	)
-
-	// Error handling
-	if err != 0 {
-		panic(err)
+	); errno != 0 {
+		fmt.Fprintf(os.Stderr, "Failed to get terminal settings: %v\n", errno)
+		return func() {} // Return no-op cleanup
 	}
 
-	// Save terminal settings for restore
-	oldTermios := termios
+	oldState := termios
 
-	// Change terminal settings
-	termios.Lflag &^= syscall.ECHO | syscall.ICANON // Disable echo and canonical mode
-	termios.Cc[syscall.VMIN] = 1 					// Minimum read characters
-	termios.Cc[syscall.VTIME] = 0					// Infinite timeout
+	// Disable canonical mode and echo
+	termios.Lflag &^= syscall.ECHO | syscall.ICANON
+	termios.Cc[syscall.VMIN] = 1
+	termios.Cc[syscall.VTIME] = 0
 
-	// Set Raw mode
-	syscall.Syscall(
+	// Apply settings
+	if _, _, errno := syscall.Syscall(
 		syscall.SYS_IOCTL,
-		uintptr(syscall.Stdin),
+		uintptr(fd),
 		uintptr(syscall.TCSETS),
 		uintptr(unsafe.Pointer(&termios)),
-	)
+	); errno != 0 {
+		fmt.Fprintf(os.Stderr, "Failed to set raw mode: %v\n", errno)
+		return func() {} // Return no-op cleanup
+	}
 
-	// This is what gets deferred to restore terminal functionality
+	// Return restore function
 	return func() {
-		// Set terminal settings back to the original values
 		syscall.Syscall(
 			syscall.SYS_IOCTL,
-			uintptr(syscall.Stdin),
+			uintptr(fd),
 			uintptr(syscall.TCSETS),
-			uintptr(unsafe.Pointer(&oldTermios)),
+			uintptr(unsafe.Pointer(&oldState)),
 		)
 	}
 }

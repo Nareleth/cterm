@@ -4,13 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/signal"
 	"github.com/Nareleth/cterm"
 )
 
 // Create a screen buffer
 var screen = bufio.NewWriter(os.Stdout)
 
-/*
+
 // Create a Cursor object for Delta time testing
 type Cursor struct {
 	x 		int
@@ -21,23 +22,18 @@ type Cursor struct {
 
 
 // Create a reusable movement function for the cursors
-func (p *Cursor) Move() {
-	return p.y += p.speed
-}
-*/
-
-
-// Render function to keep main cleaner
-func render() {
-	col := 0
-
-	// Initialize a screen grid
-	for i := 0; i < col; i++ {
-		fmt.Fprint(screen)
+func (c *Cursor) Move(startY, maxY int) {
+	c.y += c.speed
+	if c.y > maxY {
+		c.y = startY
 	}
+}
 
 
-	fmt.Fprint(screen, "#")
+// Create a draw function for the cursors
+func (c *Cursor) Draw() {
+	cterm.MoveCursor(screen, c.x, c.y)
+	fmt.Fprintf(screen, "%c", c.sprite)
 }
 
 
@@ -49,25 +45,36 @@ func main() {
 	// Disable line buffering
 	cleanup := cterm.Raw()
 
-	// Run the cleanup actions to restore echoing and line buffering when program finishes
+	// Run the cleanup actions to restore normal mode
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		<-c
+		cleanup()
+		os.Exit(0)
+	}()
+
 	defer cleanup()
 
-/*
-	// Declare cursor objects to test delta speed
-	cursorTestBase := &Cursor {
+
+	// Movement track
+	startY 	:= 3
+	maxY 	:= 10
+
+	cursorRacerAlpha := &Cursor {
 		x: 		0,
-		y: 		2,
-		sprite: '\u2588',
-		speed:	5,
+		y: 		startY,
+		sprite: '@',
+		speed:	1,
 	}
 
-	cursorTestDelta := &Cursor {
+	cursorRacerDelta := &Cursor {
 		x: 		10,
-		y: 		2,
-		sprite: '\u2588',
-		speed:	5,
+		y: 		startY,
+		sprite: '@',
+		speed:	1,
 	}
-*/
+
 
 	// Channel to read key press
 	key := make(chan byte)
@@ -99,9 +106,15 @@ func main() {
 		fmt.Fprintf(screen, "Press q to exit\n")
 
 
-		// Render/Drawing layer
-		render()
-		
+		// Render and draw cursors
+		cursorRacerAlpha.Move(startY, maxY)
+		cursorRacerAlpha.Draw()
+
+		cursorRacerDelta.Move(startY, maxY)
+		cursorRacerDelta.Draw()
+
+		// move cursor to bottom
+		cterm.MoveCursor(screen, 0, maxY+1)
 
 		// Clears the buffer data and writes to STDOUT
 		screen.Flush()
