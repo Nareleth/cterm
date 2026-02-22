@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"fmt"
 	"syscall"
+	"time"
 	"unsafe"
 )
 
@@ -15,6 +16,19 @@ type colorEscapeCodes struct {
 
 	Reset string
 }
+
+
+// Create a clock struct for FPS
+type Clock struct {
+	targetFPS 		int 			// User-defined FPS limit
+	frameTime 		time.Duration 	// Time to maintain target FPS
+	frameStart 		time.Time 		// Last frame
+	fpsTimer 		time.Time 		// Timer to track frames per second
+	frameCount		int 			// Counter to track frames per second
+	currentFPS 		int 			// Actual frames per second
+}
+
+
 
 // Write escape sequence to style text
 var Colors = colorEscapeCodes {
@@ -129,4 +143,63 @@ func ShowCursor(screen *bufio.Writer){
 // Move cursor to specified location
 func MoveCursor(buffer *bufio.Writer, x, y int){
 	fmt.Fprintf(buffer, "\033[%d;%dH", y+1, x+1)
+}
+
+
+// Clock and FPS
+
+
+// Create a new game clock for target frames per second
+func NewClock(targetFPS int) *Clock {
+	currentTime := time.Now()
+
+	return &Clock{
+		targetFPS: 	targetFPS,	
+		frameTime: 	time.Second / time.Duration(targetFPS),
+		frameStart: currentTime,
+		fpsTimer:	currentTime,
+	}		
+}
+
+
+
+// Start a new frame
+func (c *Clock) FrameStart() {
+	c.frameStart = time.Now()
+	c.frameCount++
+
+	// Calculate FPS
+	if time.Since(c.fpsTimer) >= time.Second {
+		// FPS
+		c.currentFPS = c.frameCount
+
+		// Reset timer and frames
+		c.frameCount = 0
+		c.fpsTimer = time.Now()
+
+	}
+}
+
+
+// Ends the frame
+func (c *Clock) FrameEnd() {
+	// Check elapsed time since the frame start
+	elapsedTime := time.Since(c.frameStart)
+
+	// If the frame rendered too fast, wait for target ms
+	if elapsedTime < c.frameTime {
+		time.Sleep(c.frameTime - elapsedTime)
+	}
+}
+
+
+// Returns the value of the current FPS from the game clock
+func (c *Clock) GetFPS() int {
+	return c.currentFPS
+}
+
+
+// Returns Delta time for consistent measurements
+func (c *Clock) GetDeltaTime() float64 {
+	return time.Since(c.frameStart).Seconds()
 }

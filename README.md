@@ -99,10 +99,10 @@ Raw sets the terminal to raw mode, and restores to previous state when finished.
 <details>
 <summary>Example</summary>
 ```
-// Set terminal in Raw Mode
-cleanup := cterm.Raw()
-// Restore terminal settings when finished
-defer cleanup()
+// Set terminal in Raw Mode  
+cleanup := cterm.Raw()  
+// Restore terminal settings when finished  
+defer cleanup()  
 ```
 </details>
 
@@ -119,3 +119,94 @@ cterm.ShowCursor(screen)
 ```
 </details>
 
+#### func NewClock
+```
+func NewClock(targetFPS int) *Clock
+```
+<details>
+Create a new game clock for calculating frames per second.  
+<summary>Example</summary>
+```
+// Starts new game clock at 30fps  
+gameClock := cterm.NewClock(30)   
+```
+</details>
+
+#### func Clock.FrameStart()
+```
+func Clock.FrameStart()  
+```
+<details>
+Starts calculating frames per second at the start of an animation loop.  
+<summary>Example</summary>
+```
+// Starts new game clock at 30fps  
+gameClock := cterm.NewClock(30)   
+for {  
+	// Starts frame calculating  
+	gameClock.FrameStart()  	
+	// Ends frame calculating  
+	gameClock.FrameEnd()  
+}  
+```
+</details>
+
+
+#### func Clock.FrameEnd()
+```
+func Clock.FrameEnd()  
+```
+<details>
+Sleeps the frame until elapsed time finishes. Goes at the end of the animation loop. 
+<summary>Example</summary>
+```
+// Starts new game clock at 30fps  
+gameClock := cterm.NewClock(30)   
+for {  
+	// Starts frame calculating  
+	gameClock.FrameStart()  
+	// Ends frame calculating  
+	gameClock.FrameEnd()  
+}  
+```
+</details>
+
+#### func Clock.GetFPS() int
+```
+func (c *Clock) GetFPS() int  
+```
+<details>
+Gets the current FPS value.
+<summary>Example</summary>
+```
+// Starts new game clock at 30fps  
+gameClock := cterm.NewClock(30)   
+for {  
+	// Starts frame calculating  
+	gameClock.FrameStart()  
+	fmt.Fprintf(buffer, "FPS: %d\n", gameClock.GetFPS())
+	// Ends frame calculating  
+	gameClock.FrameEnd()  
+}  
+```
+</details>
+
+#### func (c *Clock) GetDeltaTime() float6
+```
+func (c *Clock) GetDeltaTime() float6 
+```
+<details>
+Gets the current delta time value.
+<summary>Example</summary>
+```
+// Starts new game clock at 30fps  
+gameClock := cterm.NewClock(30)   
+for {  
+	// Starts frame calculating  
+	gameClock.FrameStart()  
+	fmt.Fprintf(buffer, "Delta: %f\n", gameClock.GetDeltaTime())
+	// Ends frame calculating  
+	gameClock.FrameEnd()  
+}  
+```
+</details>
