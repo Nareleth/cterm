@@ -24,6 +24,10 @@ type Clock struct {
 	targetFPS 		int 			// User-defined FPS limit
 	frameTime 		time.Duration 	// Time to maintain target FPS
 	frameStart 		time.Time 		// Last frame
+
+	lastFrameTime 	time.Time 		// Tracks time for delta time
+	deltaTime 		float64 		// Delta time
+
 	fpsTimer 		time.Time 		// Timer to track frames per second
 	frameCount		int 			// Counter to track frames per second
 	currentFPS 		int 			// Actual frames per second
@@ -156,10 +160,11 @@ func NewClock(targetFPS int) *Clock {
 	currentTime := time.Now()
 
 	return &Clock{
-		targetFPS: 	targetFPS,	
-		frameTime: 	time.Second / time.Duration(targetFPS),
-		frameStart: currentTime,
-		fpsTimer:	currentTime,
+		targetFPS: 		targetFPS,	
+		frameTime: 		time.Second / time.Duration(targetFPS),
+		frameStart: 	currentTime,
+		lastFrameTime: 	currentTime,
+		fpsTimer:		currentTime,
 	}		
 }
 
@@ -167,6 +172,12 @@ func NewClock(targetFPS int) *Clock {
 
 // Start a new frame
 func (c *Clock) FrameStart() {
+	now := time.Now()
+
+	// Calculate Delta Time
+	c.deltaTime = now.Sub(c.lastFrameTime).Seconds()
+	c.lastFrameTime = now
+
 	c.frameStart = time.Now()
 	c.frameCount++
 
@@ -203,5 +214,5 @@ func (c *Clock) GetFPS() int {
 
 // Returns Delta time for consistent measurements
 func (c *Clock) GetDeltaTime() float64 {
-	return time.Since(c.frameStart).Seconds()
+	return c.deltaTime
 }

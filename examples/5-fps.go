@@ -22,8 +22,15 @@ type Cursor struct {
 
 
 // Create a reusable movement function for the cursors
-func (c *Cursor) Move(startY, maxY int) {
-	c.y += c.speed
+func (c *Cursor) Move(startY, maxY int, deltaTime float64) {
+
+	// Check if delta  time is used
+	if deltaTime > 0 {
+		c.y += int(float64(c.speed) * deltaTime)
+	} else {
+		c.y += c.speed
+	}
+
 	if c.y > maxY {
 		c.y = startY
 	}
@@ -39,8 +46,11 @@ func (c *Cursor) Draw() {
 
 
 func main() {
+	// Configure me!
+	SetFPS := 30
+
 	// Starts new game clock at 30fps
-	gameClock := cterm.NewClock(30) 
+	gameClock := cterm.NewClock(SetFPS) 
 
 	// Disable line buffering
 	cleanup := cterm.Raw()
@@ -72,7 +82,7 @@ func main() {
 		x: 		10,
 		y: 		startY,
 		sprite: '@',
-		speed:	1,
+		speed:	SetFPS,
 	}
 
 
@@ -97,6 +107,9 @@ func main() {
 		// Starts frame calculating
 		gameClock.FrameStart()
 
+		// Get Delta Time
+		dt := gameClock.GetDeltaTime()
+
 		// Render FPS reader
 		cterm.MoveCursor(screen, 0, 0)
 		fmt.Fprintf(screen, "FPS: %d\n", gameClock.GetFPS())
@@ -107,10 +120,10 @@ func main() {
 
 
 		// Render and draw cursors
-		cursorRacerAlpha.Move(startY, maxY)
+		cursorRacerAlpha.Move(startY, maxY, 0)
 		cursorRacerAlpha.Draw()
 
-		cursorRacerDelta.Move(startY, maxY)
+		cursorRacerDelta.Move(startY, maxY, dt)
 		cursorRacerDelta.Draw()
 
 		// move cursor to bottom
