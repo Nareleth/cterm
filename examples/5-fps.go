@@ -47,7 +47,7 @@ func (c *Cursor) Draw() {
 
 func main() {
 	// Configure me!
-	SetFPS := 30
+	SetFPS := 15
 
 	// Starts new game clock at 30fps
 	gameClock := cterm.NewClock(SetFPS) 
@@ -112,7 +112,8 @@ func main() {
 
 		// Render FPS reader
 		cterm.MoveCursor(screen, 0, 0)
-		fmt.Fprintf(screen, "FPS: %d\n", gameClock.GetFPS())
+		//fmt.Fprintf(screen, "FPS: %d\n", gameClock.GetFPS())
+		fmt.Fprintf(screen, "%s %d%10s: %d", "Current FPS:", gameClock.GetFPS(), "Set FPS", SetFPS)
 
 		// Render quit text
 		cterm.MoveCursor(screen, 0, 1)

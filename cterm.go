@@ -130,7 +130,7 @@ func Raw() func() {
 
 // Clear the screen using raw terminal escape code
 func Clear(screen *bufio.Writer){
-	fmt.Fprint(screen, "\033c")
+	fmt.Fprint(screen, "\033[2J\033[H")
 }
 
 
