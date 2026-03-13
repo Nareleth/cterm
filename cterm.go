@@ -157,7 +157,7 @@ func MoveCursor(buffer *bufio.Writer, x, y int){
 // Clean up functions on program exit
 func DeferExit(cleanup func()) {
 	sig := make(chan os.Signal, 1)
-	signal.Notify(channel, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-sig
 		cleanup()
