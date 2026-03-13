@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/signal"
 	"syscall"
 	"time"
 	"unsafe"
@@ -150,6 +151,20 @@ func ShowCursor(screen *bufio.Writer){
 func MoveCursor(buffer *bufio.Writer, x, y int){
 	fmt.Fprintf(buffer, "\033[%d;%dH", y+1, x+1)
 }
+
+
+
+// Clean up functions on program exit
+func DeferExit(cleanup func()) {
+	sig := make(chan os.Signal, 1)
+	signal.Notify(channel, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sig
+		cleanup()
+		os.Exit(0)
+	}()
+}
+
 
 
 // Clock and FPS
