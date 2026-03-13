@@ -119,6 +119,23 @@ cterm.ShowCursor(screen)
 ```
 </details>
 
+#### func DeferExit
+```
+func  DeferExit(cleanup func())  
+ ```  
+<details>
+DeferExit calls a custom function on os interrupt or SYSKILL for cleaning up.  
+<summary>Example</summary>
+```
+cterm.DeferExit(func() {
+	cterm.ShowCursor(screen)
+	screen.Flush()
+})
+```
+</details>
+
+
+
 #### func NewClock
 ```
 func NewClock(targetFPS int) *Clock
